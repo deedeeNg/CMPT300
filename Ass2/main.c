@@ -19,7 +19,13 @@ static char* remote_ip;
 
 int local_port_int;
 int remote_port_int;
+int shutDown;
 
+void freeItem(void* item) {
+    if (item != NULL) {
+        free(item);
+    }
+}
 int main(int argc, char* args[]) {
 
     printf("Starting..\n");
@@ -30,6 +36,7 @@ int main(int argc, char* args[]) {
     remote_ip = args[2];
     remote_port = args[3];
 
+    shutDown = 1;
     local_port_int = atoi(local_port);
     remote_port_int = atoi(remote_port);
 
@@ -58,7 +65,7 @@ int main(int argc, char* args[]) {
     // printf("Enter something to kill the receive thread\n");
     // char x;
     // scanf("%c", &x);
-    while (1) {
+    while (shutDown) {
         
     }
 
@@ -67,6 +74,8 @@ int main(int argc, char* args[]) {
     Read_shutdown();
     Write_shutdown();
     Send_shutdown();
+    // List_free(receive_list, freeItem);
+    // List_free(send_list, freeItem);
 
     printf("DONE..\n");
 

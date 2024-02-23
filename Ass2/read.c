@@ -24,11 +24,16 @@ void* readThread(List* receive_list) {
         }
         pthread_mutex_unlock(&s_syncOkToReceiveMutex); 
         char* message = List_first(receive_list);
-        fputs(s_rxMessage, stdout);
-        fputs(message, stdout);
-        fflush(stdout);
-        free(message);
-        List_remove(receive_list);
+        if (message[0] == '!' && message[2] == '\0') {
+            printf("The remote user was shut down!!\n");
+            shutDown = 0;
+        } else {
+            fputs(s_rxMessage, stdout);
+            fputs(message, stdout);
+            fflush(stdout);
+            free(message);
+            List_remove(receive_list);
+        }
     }
 }
 

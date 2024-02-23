@@ -9,5 +9,6 @@ extern pthread_mutex_t s_syncOkToSendMutex;
 extern pthread_cond_t s_syncOkToSendCond;
 extern int local_port_int;
 extern int remote_port_int;
+extern int shutDown;
 
 #endif

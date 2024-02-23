@@ -37,12 +37,15 @@ void* sendThread(List* send_list) {
         }
         pthread_mutex_unlock(&s_syncOkToSendMutex);
         char* messageSx = List_first(send_list);
-        if(sendto(socketDescriptor,
+        sendto(socketDescriptor,
             messageSx, strlen(messageSx), 0, 
-            sinSendRemote->ai_addr, sinSendRemote->ai_addrlen)) {
-            }
-        free(messageSx);
-        List_remove(send_list);
+            sinSendRemote->ai_addr, sinSendRemote->ai_addrlen);
+        if (messageSx[0] == '!' && messageSx[2] == '\0') {
+            shutDown = 0;
+        } else {
+            free(messageSx);
+            List_remove(send_list);
+        }
     }
 }
 
