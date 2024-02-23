@@ -55,14 +55,14 @@ int main(int argc, char* args[]) {
 	hint.ai_canonname = NULL;
 	hint.ai_addr = NULL;
 	hint.ai_next = NULL;
-    getaddrinfo(remote_ip, &local_port[0], &hint, &currAddr);
+    getaddrinfo(NULL, &local_port[0], &hint, &currAddr);
     
     // Start up my modules
-    Receiver_init("User 1", receive_list, &currAddr);
+    Receiver_init("User 1", receive_list, currAddr);
     Read_init(receive_list, "User 1");
 
     Write_init(send_list);
-    Send_init("User_2",send_list, &remoteAddr);
+    Send_init("User_2",send_list, remoteAddr);
 
     //Wait for user input
     // printf("Enter something to kill the receive thread\n");

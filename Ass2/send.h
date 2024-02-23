@@ -13,7 +13,7 @@
 #include "shared.h"
 #include "list.h"
 
-void Send_init(char* sxMessage, List* send_list, struct addrinfo** remote);
+void Send_init(char* sxMessage, List* send_list, struct addrinfo* remote);
 void Send_shutdown(void);
 
 

@@ -15,7 +15,7 @@
 #include "list.h"
 
 // Start background recerve thread
-void Receiver_init(char* rxMessage, List* receive_list, struct addrinfo** remote);
+void Receiver_init(char* rxMessage, List* receive_list, struct addrinfo* remote);
 
 // Stop background receive thread and cleanup
 void Receiver_shutdown(void);

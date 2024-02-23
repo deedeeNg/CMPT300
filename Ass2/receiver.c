@@ -38,12 +38,9 @@ void* receiveThread(List* receive_list) {
 
     while(1) {
         char messageRx[MSG_MAX_LEN];
-        struct sockaddr_in sinReceiveRemote;
-        unsigned int sin_len = sizeof(sinReceiveRemote);
         int byteRx = recvfrom(socketDescriptor,
             messageRx, MSG_MAX_LEN, 0, 
-            (struct sockaddr*) &sinReceiveRemote, &sin_len);
-
+            sinReceiveRemote->ai_addr, &sinReceiveRemote->ai_addrlen);
         int terminateIdx = (byteRx < MSG_MAX_LEN) ? byteRx : MSG_MAX_LEN - 1;
         messageRx[terminateIdx] = 0;
 
@@ -58,7 +55,7 @@ void* receiveThread(List* receive_list) {
     }
 }
 
-void Receiver_init(char* rxMessage, List* receive_list, struct addrinfo** remote) {
+void Receiver_init(char* rxMessage, List* receive_list, struct addrinfo* remote) {
     s_rxMessage = rxMessage;
     sinReceiveRemote = remote;
     pthread_create(

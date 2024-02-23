@@ -37,20 +37,19 @@ void* sendThread(List* send_list) {
         }
         pthread_mutex_unlock(&s_syncOkToSendMutex);
         char* messageSx = List_first(send_list);
-
-        unsigned int sin_len = sizeof(sinSendRemote);
         if(sendto(socketDescriptor,
             messageSx, strlen(messageSx), 0, 
-            (struct sockaddr*) &sinSendRemote, sin_len)) {
+            sinSendRemote->ai_addr, &sinSendRemote->ai_addrlen)) {
+                printf("succesfully send\n");
             }
         free(messageSx);
         List_remove(send_list);
     }
 }
 
-void Send_init(char* sxMessage, List* send_list, struct addrinfo** remote) {
+void Send_init(char* sxMessage, List* send_list, struct addrinfo* remote) {
     s_sxMessage = sxMessage;
-    sinSendRemote = *remote;
+    sinSendRemote = remote;
     pthread_create(
         &threadPID,             // PID(by pointer)
         NULL,                   // Attributes
