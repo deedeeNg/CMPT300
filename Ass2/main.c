@@ -74,8 +74,8 @@ int main(int argc, char* args[]) {
     Read_shutdown();
     Write_shutdown();
     Send_shutdown();
-    // List_free(receive_list, freeItem);
-    // List_free(send_list, freeItem);
+    List_free(receive_list, freeItem);
+    List_free(send_list, freeItem);
 
     printf("DONE..\n");
 
