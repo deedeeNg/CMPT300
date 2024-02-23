@@ -18,6 +18,7 @@ static char* remote_port;
 static char* remote_ip;
 
 int local_port_int;
+int remote_port_int;
 
 int main(int argc, char* args[]) {
 
@@ -30,39 +31,28 @@ int main(int argc, char* args[]) {
     remote_port = args[3];
 
     local_port_int = atoi(local_port);
+    remote_port_int = atoi(remote_port);
 
     struct addrinfo *remoteAddr;
-    struct addrinfo *currAddr;
-    struct addrinfo hint;
+    struct addrinfo hintRemote;
 
-    memset(&hint, 0, sizeof(hint));
-    hint.ai_flags = 0;
-	hint.ai_family = AF_INET;
-	hint.ai_socktype = SOCK_DGRAM;
-	hint.ai_protocol = 0;
-	hint.ai_addrlen = 0;
-	hint.ai_canonname = NULL;
-	hint.ai_addr = NULL;
-	hint.ai_next = NULL;
-    getaddrinfo(remote_ip, &remote_port[0], &hint, &remoteAddr);
-
-    memset(&hint, 0, sizeof(hint));
-    hint.ai_flags = 0;
-	hint.ai_family = AF_INET;
-	hint.ai_socktype = SOCK_DGRAM;
-	hint.ai_protocol = 0;
-	hint.ai_addrlen = 0;
-	hint.ai_canonname = NULL;
-	hint.ai_addr = NULL;
-	hint.ai_next = NULL;
-    getaddrinfo(NULL, &local_port[0], &hint, &currAddr);
+    memset(&hintRemote, 0, sizeof(hintRemote));
+    hintRemote.ai_flags = 0;
+	hintRemote.ai_family = AF_INET;
+	hintRemote.ai_socktype = SOCK_DGRAM;
+	hintRemote.ai_protocol = 0;
+	hintRemote.ai_addrlen = 0;
+	hintRemote.ai_canonname = NULL;
+	hintRemote.ai_addr = NULL;
+	hintRemote.ai_next = NULL;
+    getaddrinfo(remote_ip, &remote_port[0], &hintRemote, &remoteAddr);
     
     // Start up my modules
-    Receiver_init("User 1", receive_list, currAddr);
-    Read_init(receive_list, "User 1");
+    Receiver_init(receive_list);
+    Read_init(receive_list, "New message: ");
 
     Write_init(send_list);
-    Send_init("User_2",send_list, remoteAddr);
+    Send_init("User 2: ",send_list, remoteAddr);
 
     //Wait for user input
     // printf("Enter something to kill the receive thread\n");

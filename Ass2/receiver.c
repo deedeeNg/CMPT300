@@ -12,10 +12,8 @@
 #include "list.h"
 
 #define MSG_MAX_LEN 1024
-#define PORT 22110
 
 static pthread_t threadPID;
-static char* s_rxMessage;
 
 struct addrinfo* sinReceiveRemote;
 
@@ -24,7 +22,6 @@ pthread_cond_t s_syncOkToReceiveCond = PTHREAD_COND_INITIALIZER;
 
 void* receiveThread(List* receive_list) {
     struct sockaddr_in sin;
-    
     memset(&sin, 0, sizeof(sin));
     sin.sin_family = AF_INET; // Connect may be from network
     sin.sin_addr.s_addr = htonl(INADDR_ANY); //Host to network long
@@ -37,10 +34,12 @@ void* receiveThread(List* receive_list) {
     bind(socketDescriptor, (struct sockaddr*) &sin, sizeof(sin));
 
     while(1) {
+        struct sockaddr_in sinRemote;
+        unsigned int sin_len = sizeof(sinRemote);
         char messageRx[MSG_MAX_LEN];
         int byteRx = recvfrom(socketDescriptor,
             messageRx, MSG_MAX_LEN, 0, 
-            sinReceiveRemote->ai_addr, &sinReceiveRemote->ai_addrlen);
+            (struct sockaddr*) &sinRemote, &sin_len);
         int terminateIdx = (byteRx < MSG_MAX_LEN) ? byteRx : MSG_MAX_LEN - 1;
         messageRx[terminateIdx] = 0;
 
@@ -55,9 +54,7 @@ void* receiveThread(List* receive_list) {
     }
 }
 
-void Receiver_init(char* rxMessage, List* receive_list, struct addrinfo* remote) {
-    s_rxMessage = rxMessage;
-    sinReceiveRemote = remote;
+void Receiver_init(List* receive_list) {
     pthread_create(
         &threadPID,             // PID(by pointer)
         NULL,                   // Attributes

@@ -39,8 +39,7 @@ void* sendThread(List* send_list) {
         char* messageSx = List_first(send_list);
         if(sendto(socketDescriptor,
             messageSx, strlen(messageSx), 0, 
-            sinSendRemote->ai_addr, &sinSendRemote->ai_addrlen)) {
-                printf("succesfully send\n");
+            sinSendRemote->ai_addr, sinSendRemote->ai_addrlen)) {
             }
         free(messageSx);
         List_remove(send_list);

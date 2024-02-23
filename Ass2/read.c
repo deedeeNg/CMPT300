@@ -12,7 +12,6 @@
 #include "read.h"
 
 #define MSG_MAX_LEN 1024
-#define PORT 22110
 
 static pthread_t threadPID;
 static char* s_rxMessage;
@@ -25,7 +24,8 @@ void* readThread(List* receive_list) {
         }
         pthread_mutex_unlock(&s_syncOkToReceiveMutex); 
         char* message = List_first(receive_list);
-        printf("%s: %s", s_rxMessage, message);
+        fputs(s_rxMessage, stdout);
+        fputs(message, stdout);
         fflush(stdout);
         free(message);
         List_remove(receive_list);
