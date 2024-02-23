@@ -15,20 +15,34 @@
 #define PORT 22110
 
 static pthread_t threadPID;
-static int socketDescriptor;
 static char* s_rxMessage;
+
+struct addrinfo* sinReceiveRemote;
 
 pthread_mutex_t s_syncOkToReceiveMutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t s_syncOkToReceiveCond = PTHREAD_COND_INITIALIZER;
-struct sockaddr_in sinRemote;
 
 void* receiveThread(List* receive_list) {
+    struct sockaddr_in sin;
+    
+    memset(&sin, 0, sizeof(sin));
+    sin.sin_family = AF_INET; // Connect may be from network
+    sin.sin_addr.s_addr = htonl(INADDR_ANY); //Host to network long
+    sin.sin_port = htons(local_port_int); //Host to network short
+
+    // Create the socket for UDP
+    int socketDescriptor = socket(PF_INET, SOCK_DGRAM, 0);
+
+    // Bind the socket to the port(PORT) that we specify
+    bind(socketDescriptor, (struct sockaddr*) &sin, sizeof(sin));
+
     while(1) {
         char messageRx[MSG_MAX_LEN];
-        unsigned int sin_len = sizeof(sinRemote);
+        struct sockaddr_in sinReceiveRemote;
+        unsigned int sin_len = sizeof(sinReceiveRemote);
         int byteRx = recvfrom(socketDescriptor,
             messageRx, MSG_MAX_LEN, 0, 
-            (struct sockaddr*) &sinRemote, &sin_len);
+            (struct sockaddr*) &sinReceiveRemote, &sin_len);
 
         int terminateIdx = (byteRx < MSG_MAX_LEN) ? byteRx : MSG_MAX_LEN - 1;
         messageRx[terminateIdx] = 0;
@@ -44,10 +58,9 @@ void* receiveThread(List* receive_list) {
     }
 }
 
-void Receiver_init(char* rxMessage, List* receive_list, int socket, struct sockaddr_in remote) {
+void Receiver_init(char* rxMessage, List* receive_list, struct addrinfo** remote) {
     s_rxMessage = rxMessage;
-    socketDescriptor = socket;
-    sinRemote = remote;
+    sinReceiveRemote = remote;
     pthread_create(
         &threadPID,             // PID(by pointer)
         NULL,                   // Attributes

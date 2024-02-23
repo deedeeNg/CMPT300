@@ -11,16 +11,25 @@
 #include "list.h"
 
 #define MSG_MAX_LEN 1024
-#define PORT 22110
 
 static pthread_t threadPID;
-static int socketDescriptor;
 static char* s_sxMessage;
 
-struct sockaddr_in sinRemote;
-
+struct addrinfo* sinSendRemote;
 
 void* sendThread(List* send_list) {
+    struct sockaddr_in sin;
+    
+    memset(&sin, 0, sizeof(sin));
+    sin.sin_family = AF_INET; // Connect may be from network
+    sin.sin_addr.s_addr = htonl(INADDR_ANY); //Host to network long
+    sin.sin_port = htons(local_port_int); //Host to network short
+
+    // Create the socket for UDP
+    int socketDescriptor = socket(PF_INET, SOCK_DGRAM, 0);
+
+    // Bind the socket to the port(PORT) that we specify
+    bind(socketDescriptor, (struct sockaddr*) &sin, sizeof(sin));
     while(1) {
         pthread_mutex_lock(&s_syncOkToSendMutex); 
         {
@@ -28,23 +37,20 @@ void* sendThread(List* send_list) {
         }
         pthread_mutex_unlock(&s_syncOkToSendMutex);
         char* messageSx = List_first(send_list);
-        char messageTx[MSG_MAX_LEN];
-        sprintf(messageTx, "%s: %s", s_sxMessage, messageSx);
 
-        unsigned int sin_len = sizeof(sinRemote);
-        sendto(socketDescriptor,
-            messageTx, strlen(messageTx), 0, 
-            (struct sockaddr*) &sinRemote, sin_len);
-
+        unsigned int sin_len = sizeof(sinSendRemote);
+        if(sendto(socketDescriptor,
+            messageSx, strlen(messageSx), 0, 
+            (struct sockaddr*) &sinSendRemote, sin_len)) {
+            }
         free(messageSx);
         List_remove(send_list);
     }
 }
 
-void Send_init(char* sxMessage, List* send_list, int socket, struct sockaddr_in remote) {
+void Send_init(char* sxMessage, List* send_list, struct addrinfo** remote) {
     s_sxMessage = sxMessage;
-    socketDescriptor = socket;
-    sinRemote = remote;
+    sinSendRemote = *remote;
     pthread_create(
         &threadPID,             // PID(by pointer)
         NULL,                   // Attributes

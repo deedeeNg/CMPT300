@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <netdb.h>
+#include <arpa/inet.h>
 #include "receiver.h"
 #include "send.h"
 #include "write.h"
@@ -12,40 +13,64 @@
 #include "list.h"
 
 #define MSG_MAX_LEN 1024
-#define PORT 22110
+static char* local_port;
+static char* remote_port;
+static char* remote_ip;
 
-int main(int argc, char** args) {
+int local_port_int;
+
+int main(int argc, char* args[]) {
 
     printf("Starting..\n");
     List* receive_list = List_create();
     List* send_list = List_create();
 
-    struct sockaddr_in sin;
-    memset(&sin, 0, sizeof(sin));
-    sin.sin_family = AF_INET; // Connect may be from network
-    sin.sin_addr.s_addr = htonl(INADDR_ANY); //Host to network long
-    sin.sin_port = htons(PORT); //Host to network short
+    local_port = args[1];
+    remote_ip = args[2];
+    remote_port = args[3];
 
-    // Create the socket for UDP
-    int socketDescriptor = socket(PF_INET, SOCK_DGRAM, 0);
+    local_port_int = atoi(local_port);
 
-    // Bind the socket to the port(PORT) that we specify
-    bind(socketDescriptor, (struct sockaddr*) &sin, sizeof(sin));
+    struct addrinfo *remoteAddr;
+    struct addrinfo *currAddr;
+    struct addrinfo hint;
 
-    struct sockaddr_in sinRemote;
-    unsigned int sin_len = sizeof(sinRemote);
+    memset(&hint, 0, sizeof(hint));
+    hint.ai_flags = 0;
+	hint.ai_family = AF_INET;
+	hint.ai_socktype = SOCK_DGRAM;
+	hint.ai_protocol = 0;
+	hint.ai_addrlen = 0;
+	hint.ai_canonname = NULL;
+	hint.ai_addr = NULL;
+	hint.ai_next = NULL;
+    getaddrinfo(remote_ip, &remote_port[0], &hint, &remoteAddr);
+
+    memset(&hint, 0, sizeof(hint));
+    hint.ai_flags = 0;
+	hint.ai_family = AF_INET;
+	hint.ai_socktype = SOCK_DGRAM;
+	hint.ai_protocol = 0;
+	hint.ai_addrlen = 0;
+	hint.ai_canonname = NULL;
+	hint.ai_addr = NULL;
+	hint.ai_next = NULL;
+    getaddrinfo(remote_ip, &local_port[0], &hint, &currAddr);
     
     // Start up my modules
-    Receiver_init("User 1", receive_list, socketDescriptor, sinRemote);
+    Receiver_init("User 1", receive_list, &currAddr);
     Read_init(receive_list, "User 1");
 
     Write_init(send_list);
-    Send_init("User_2",send_list, socketDescriptor, sinRemote);
+    Send_init("User_2",send_list, &remoteAddr);
 
     //Wait for user input
-    printf("Enter something to kill the receive thread\n");
-    char x;
-    scanf("%c", &x);
+    // printf("Enter something to kill the receive thread\n");
+    // char x;
+    // scanf("%c", &x);
+    while (1) {
+        
+    }
 
     // Shutdown my modules
     Receiver_shutdown();
