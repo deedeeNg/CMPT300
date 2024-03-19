@@ -211,7 +211,7 @@ void kill_pcb(int pid) {
 
 void exit_pcb() {
     if (curr_pcb->pid == 0) {
-        printf("Terminate... See you later UwU.");
+        printf("Terminate... See you later UwU.\n");
         exit(1);
     }
 
@@ -221,6 +221,7 @@ void exit_pcb() {
     List_remove(list_pcb);
 
     free(curr_pcb);
+    curr_pcb = NULL;
     printf("SUCCESS...\n");
 
     next_pcb();
