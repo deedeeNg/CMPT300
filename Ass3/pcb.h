@@ -25,6 +25,7 @@ void create_pcb_init();
 void create_pcb(int priority);
 int fork_pcb();
 void kill_pcb(int pid);
+void exit_pcb();
 void total_info_pcb();
 
 #endif

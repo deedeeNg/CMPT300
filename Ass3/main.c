@@ -44,7 +44,44 @@ int main() {
                     break;
                 }
                 total_info_pcb();
+                break;
+
+            case 'Q':
+                if (input[1] != '\n') {
+                    printf("Quantum format is wrong please try again!!\n");
+                }
+                quantum_pcb();
+                break;
+
+            case 'E':
+                if (input[1] != '\n') {
+                    printf("Exit format is wrong please try again!!\n");
+                }
+                exit_pcb();
+                break;
+
+            case 'K':
+                if (input[1] != ' ') {
+                    printf("Kill format is wrong please try again!!\n");
+                    break;
+                }
+
+                char* pid_text = input + 2;
+                int index = 0;
+                while (*pid_text != '\n') {
+                    text[index] = *pid_text;
+                    index++;
+                    pid_text++;
+                }
+
+                text[++index] = '\0';
+                int kill_pid = atoi(text);
+                printf("%d\n", kill_pid);
+                kill_pcb(kill_pid);
+                break;
+
             default:
+                printf("Cannot recognize input. Please try again!!\n");
                 break;
         }
     }

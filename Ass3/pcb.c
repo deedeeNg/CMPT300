@@ -27,15 +27,50 @@ bool compare_pid(void* pcb, void* pid) {
 }
 
 void remove_pcb(int pid) {
+    List_first(high_priority);
+    List_first(medium_priority);
+    List_first(low_priority);
+    List_first(send_blocker);
+    List_first(receive_blocker);
+    
+    if (List_search(high_priority, compare_pid, &pid) != NULL) {
+        printf("Removing process pid %d from high priority queue... \n", pid);
+        List_remove(high_priority);
+    } else if (List_search(medium_priority, compare_pid, &pid) != NULL) {
+        printf("Removing process pid %d from medium priority queue... \n", pid);
+         List_remove(medium_priority);
+    } else if (List_search(low_priority, compare_pid, &pid) != NULL) {
+        printf("Removing process pid %d from low priority queue... \n", pid);
+         List_remove(low_priority);
+    } else if (List_search(send_blocker, compare_pid, &pid) != NULL) {
+        printf("Removing process pid %d from send blocker queue... \n", pid);
+         List_remove(send_blocker);
+    } else if (List_search(receive_blocker, compare_pid, &pid) != NULL) {
+        printf("Removing process pid %d from receive blocker queue... \n", pid);
+         List_remove(receive_blocker);
+    } else {
+        printf("There is no process with pid %d in the system. Cannot kill!!\n", pid);
+        printf("FAILURE...\n");
+        return;
+    }
 
+    printf("Removing process pid %d from the system... \n", pid);
+    List_first(list_pcb);
+    void* pcb = List_search(list_pcb, compare_pid, &pid);
+    List_remove(list_pcb);
+
+    free(pcb);
+    printf("SUCCESS...\n");
 }
 void next_pcb() {
     if (curr_pcb != NULL) {
         curr_pcb->state = READY;
         if (curr_pcb->priority == 0) {
-            List_append(high_priority, curr_pcb);
-        } else if (curr_pcb->priority == 1) {
+            curr_pcb->priority = 1;
             List_append(medium_priority, curr_pcb);
+        } else if (curr_pcb->priority == 1) {
+            curr_pcb->priority = 2;
+            List_append(low_priority, curr_pcb);
         } else {
             List_append(low_priority, curr_pcb);
         }
@@ -46,25 +81,27 @@ void next_pcb() {
         List_first(high_priority);
         curr_pcb = List_remove(high_priority);
         curr_pcb->state = RUNNING;
-        printf("Current process switch to pid %d", curr_pcb->pid);
+        printf("Current process switch to pid %d\n", curr_pcb->pid);
         return;
     } else if (List_count(medium_priority) > 0) {
         List_first(medium_priority);
         curr_pcb = List_remove(medium_priority);
         curr_pcb->state = RUNNING;
-        printf("Current process switch to pid %d", curr_pcb->pid);
+        printf("Current process switch to pid %d\n", curr_pcb->pid);
         return;
     } else if (List_count(low_priority) > 0) {
         List_first(low_priority);
         curr_pcb = List_remove(low_priority);
         curr_pcb->state = RUNNING;
-        printf("Current process switch to pid %d", curr_pcb->pid);
+        printf("Current process switch to pid %d\n", curr_pcb->pid);
         return;
     } else {
         curr_pcb = init_pcb;
-        printf("Current process switch to init process");
+        printf("Current process switch to init process\n");
         return;
     }
+
+    printf("SUCCESS...\n");
 }
 
 void create_pcb_init() {
@@ -95,28 +132,32 @@ void create_pcb(int priority) {
     proc->state = READY;
     proc->proc_message = NULL;
 
+    List_append(list_pcb, proc);
     if (curr_pcb == init_pcb) {
         proc->state = RUNNING;
         curr_pcb = proc;
+    } else {
+        // Adding to waiting list
+        if (priority == 0) {
+            List_append(high_priority, proc);
+        } else if (priority == 1) {
+            List_append(medium_priority, proc);
+        } else {
+            List_append(low_priority, proc);
+        }
     }
 
-    // Adding to corresponding list
-    List_append(list_pcb, proc);
-    if (priority == 0) {
-        List_append(high_priority, proc);
-    } else if (priority == 1) {
-        List_append(medium_priority, proc);
-    } else {
-        List_append(low_priority, proc);
-    }
+    printf("SUCCESS...\n");
 }
 
 int fork_pcb() {
     if (curr_pcb == NULL) {
         printf("There is no process is running currently. Cannot fork!!\n");
+        printf("FAILURE...\n");
         return -1;
     } else if (curr_pcb->pid == 0) {
         printf("Trying to fork init processor. Cannot fork!!\n");
+        printf("FAILURE...\n");
         return -1;
     }
 
@@ -127,7 +168,7 @@ int fork_pcb() {
     proc->state = READY;
     proc->proc_message = curr_pcb->proc_message;
 
-    // Adding to corresponding list
+    // Adding to waiting list
     List_append(list_pcb, proc);
     if (proc->priority == 0) {
         List_append(high_priority, proc);
@@ -137,31 +178,47 @@ int fork_pcb() {
         List_append(low_priority, proc);
     }
 
+    printf("SUCCESS...\n");
     return proc->pid;
 }
 
 
 void kill_pcb(int pid) {
     if (curr_pcb->pid == pid) {
-        //exit_pcb();
+        exit_pcb();
         return;
     }
 
     if (pid == 0) {
         if (List_count(list_pcb) > 0) {
             printf("Trying to kill init processor while other processes still running. Cannot kill!!\n");
+            printf("FAILURE...\n");
             return;
         } else {
-            //terminate();
-            return;
+            printf("Terminate... See you later UwU.");
+            exit(1);
         }
     }
 
-    // Running the next pcb
-    next_pcb();
-
-    // Remove from the pcb, priority, send, receive and semaphores lists
+    // Remove from the pcb, priority, send, receive and semaphores
     remove_pcb(pid);
+}
+
+void exit_pcb() {
+    if (curr_pcb->pid == 0) {
+        printf("Terminate... See you later UwU.");
+        exit(1);
+    }
+
+    printf("Removing current process pid %d ...\n", curr_pcb->pid);
+    List_first(list_pcb);
+    List_search(list_pcb, compare_pid, &curr_pcb->pid);
+    List_remove(list_pcb);
+
+    free(curr_pcb);
+    printf("SUCCESS...\n");
+
+    next_pcb();
 }
 
 void total_info_pcb() {
@@ -182,10 +239,15 @@ void total_info_pcb() {
             List_next(list_pcb);
         }
     } else {
-        printf("There are no processes running in the system");
+        printf("There are no processes running in the system\n");
     }
 }
 
 void quantum_pcb() {
-    
+    if (curr_pcb->pid == 0) {
+        printf("Currently init processor is running!!. Cannot quantum\n");
+        return;
+    }
+
+    next_pcb();
 }
