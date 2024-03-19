@@ -1,4 +1,3 @@
-#include "list.h"
 #include "pcb.h"
 #include <stdio.h>
 #include <stdlib.h>

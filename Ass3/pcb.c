@@ -5,6 +5,8 @@
 #include "list.h"
 #include "pcb.h"
 
+int pid = 0;
+
 // Queues for processes's priority
 List* high_priority;
 List* medium_priority;
@@ -20,21 +22,19 @@ PCB* curr_pcb;
 List* list_pcb;
 List* sem;
 
-int pid = 0;
-
 bool compare_pid(void* pcb, void* pid) {
-    return ((PCB*)pcb)->pid == (int*)pid;
+    return ((PCB*)pcb)->pid == *(int*)pid;
 }
 
 void remove_pcb(int pid) {
 
 }
 void next_pcb() {
-    if (curr_pcb != 0) {
+    if (curr_pcb != NULL) {
         curr_pcb->state = READY;
-        if (curr_pcb->pid == 0) {
+        if (curr_pcb->priority == 0) {
             List_append(high_priority, curr_pcb);
-        } else if (curr_pcb->pid == 1) {
+        } else if (curr_pcb->priority == 1) {
             List_append(medium_priority, curr_pcb);
         } else {
             List_append(low_priority, curr_pcb);
@@ -97,6 +97,7 @@ void create_pcb(int priority) {
 
     if (curr_pcb == init_pcb) {
         proc->state = RUNNING;
+        curr_pcb = proc;
     }
 
     // Adding to corresponding list
@@ -177,9 +178,14 @@ void total_info_pcb() {
             } else {
                 state = "BLOCKED";
             }
-            printf("%d - %d - %s", pcb->pid, pcb->priority, state);
+            printf("%d - %d - %s\n", pcb->pid, pcb->priority, state);
+            List_next(list_pcb);
         }
     } else {
         printf("There are no processes running in the system");
     }
+}
+
+void quantum_pcb() {
+    
 }
