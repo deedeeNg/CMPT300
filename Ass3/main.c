@@ -18,11 +18,13 @@ int main() {
             case 'C':
                 if (input[1] != ' ' || input[3] != '\n') {
                     printf("Create format is wrong please try again!!\n");
+                    printf("FAILURE...\n");
                     break;
                 }
                 int priority = input[2] - '0';
                 if (priority > 2 || priority < 0) {
                     printf("Priority should be between 0 and 2, please try again!!\n");
+                    printf("FAILURE...\n");
                     break;
                 }
 
@@ -32,6 +34,7 @@ int main() {
             case 'F':
                 if (input[1] != '\n') {
                     printf("Fork format is wrong please try again!!\n");
+                    printf("FAILURE...\n");
                     break;
                 }
                 int pid = fork_pcb();
@@ -41,6 +44,7 @@ int main() {
             case 'T':
                 if (input[1] != '\n') {
                     printf("TotalInfo format is wrong please try again!!\n");
+                    printf("FAILURE...\n");
                     break;
                 }
                 total_info_pcb();
@@ -49,6 +53,7 @@ int main() {
             case 'Q':
                 if (input[1] != '\n') {
                     printf("Quantum format is wrong please try again!!\n");
+                    printf("FAILURE...\n");
                 }
                 quantum_pcb();
                 break;
@@ -56,6 +61,7 @@ int main() {
             case 'E':
                 if (input[1] != '\n') {
                     printf("Exit format is wrong please try again!!\n");
+                    printf("FAILURE...\n");
                 }
                 exit_pcb();
                 break;
@@ -63,6 +69,7 @@ int main() {
             case 'K':
                 if (input[1] != ' ') {
                     printf("Kill format is wrong please try again!!\n");
+                    printf("FAILURE...\n");
                     break;
                 }
 
@@ -78,6 +85,66 @@ int main() {
                 int kill_pid = atoi(text);
                 printf("%d\n", kill_pid);
                 kill_pcb(kill_pid);
+                break;
+
+            case 'N':
+                if (input[1] != ' ') {
+                    printf("Create new semaphore is wrong please try again!!\n");
+                    printf("FAILURE...\n");
+                    break;
+                }
+
+                char * input_text = input + 2;
+                index = 0;
+                while (*input_text != ' ' && *input_text != '\n') {
+                    text[index] = *input_text;
+                    index++;
+                    input_text++;
+                }
+
+                int sid = atoi(text);
+                if (sid < 0 || sid > 4) {
+                    printf("ID of semaphore should be in range of 0 and 4. Please try again!!\n");
+                    printf("FAILURE...\n");
+                    break;
+                }
+
+                memset(&text, 0, 50);
+                index = 0;
+                input_text++;
+                while (*input_text != '\n') {
+                    text[index] = *input_text;
+                    index++;
+                    input_text++;
+                }
+
+                int initVal = atoi(text);
+                if (initVal < 0) {
+                    printf("initial value of semaphore should be larger than 0. Please try again!!\n");
+                    printf("FAILURE...\n");
+                    break;
+                }
+
+                create_sem(sid, initVal);
+                break;
+
+            case 'I':
+                if (input[1] != ' ') {
+                    printf("Procedure process information format is wrong please try again!!\n");
+                    printf("FAILURE...\n");
+                    break;
+                }
+
+                index = 0;
+                pid_text = input + 2;
+                while (*pid_text != '\n') {
+                    text[index] = *pid_text;
+                    index++;
+                    pid_text++;
+                }
+
+                pid = atoi(text);
+                proc_info(pid);
                 break;
 
             default:

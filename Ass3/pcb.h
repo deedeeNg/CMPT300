@@ -37,6 +37,7 @@ void kill_pcb(int pid);
 void exit_pcb();
 void total_info_pcb();
 void create_sem(int sid, int initVal);
+void proc_info(int pid);
 
 #endif
 

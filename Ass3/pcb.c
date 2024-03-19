@@ -26,6 +26,10 @@ bool compare_pid(void* pcb, void* pid) {
     return ((PCB*)pcb)->pid == *(int*)pid;
 }
 
+bool compare_sid(void* sem, void* sid) {
+    return ((SEM*)sem)->sid == *(int*)sid;
+}
+
 void remove_pcb(int pid) {
     List_first(high_priority);
     List_first(medium_priority);
@@ -224,9 +228,11 @@ void exit_pcb() {
 
 void total_info_pcb() {
     if (List_count(list_pcb) > 0) {
+        int count = 0;
         printf("List of process in the system: \n\n");
         List_first(list_pcb);
         while(List_curr(list_pcb) != NULL) {
+            count++;
             PCB* pcb = List_curr(list_pcb);
             char* state;
             if (pcb->state == READY) {
@@ -236,19 +242,32 @@ void total_info_pcb() {
             } else {
                 state = "BLOCKED";
             }
-            printf("%d - %d - %s\n", pcb->pid, pcb->priority, state);
+            printf("Process #%d: \n", count);
+            printf("    Pid: %d\n", pcb->pid);
+            printf("    Priority: %d\n", pcb->priority);
+            printf("    State: %s\n", state);
+            printf("    proc_message: %s\n", pcb->proc_message);
+            printf("\n");
             List_next(list_pcb);
         }
     } else {
         printf("There are no processes running in the system\n\n");
     }
 
+    printf("\n");
+
     if (List_count(list_sem) > 0) {
+        int count = 0;
         printf("List of semaphore in the system: \n\n");
         List_first(list_sem);
         while(List_curr(list_sem) != NULL) {
+            count++;
             SEM* sem = List_curr(list_sem);
-            printf("Semaphore sid %d\n", sem->sid);
+            printf("Semaphore #%d: \n", count);
+            printf("    Sid: %d\n", sem->sid);
+            printf("    Value: %d\n", sem->val);
+            printf("    Initial Value: %d\n", sem->initVal);
+            printf("\n");
             List_next(list_sem);
         }
     } else {
@@ -267,6 +286,15 @@ void quantum_pcb() {
 }
 
 void create_sem(int sid, int initVal) {
+
+    // Searching from semaphore list if the sid is already existed or not
+    List_first(list_sem);
+    if (List_search(list_sem, compare_sid, &sid) != NULL) {
+        printf("The semaphore with sid %d is already existed in the system. Please try with different ID!!\n", sid);
+        printf("FAILURE...\n");
+        return;
+    }
+
     SEM* sem = malloc(sizeof(sem));
     sem->sid = sid;
     sem->initVal = initVal;
@@ -276,4 +304,30 @@ void create_sem(int sid, int initVal) {
     List_append(list_sem, sem);
     printf("Successfully creating new semaphore with sid %d !!\n", sid);
     printf("SUCCESS...\n");
+}
+
+void proc_info(int pid) {
+    List_first(list_pcb);
+    PCB* pcb = List_search(list_pcb, compare_pid, &pid);
+
+    if (pcb != NULL) {
+        char* state;
+        if (pcb->state == READY) {
+            state = "READY";
+        } else if (pcb->state == RUNNING) {
+            state = "RUNNING";
+        } else {
+            state = "BLOCKED";
+        }
+        printf("Information of process: \n");
+        printf("    Pid: %d\n", pcb->pid);
+        printf("    Priority: %d\n", pcb->priority);
+        printf("    State: %s\n", state);
+        printf("    proc_message: %s\n", pcb->proc_message);
+        printf("SUCCESS...\n");
+        printf("\n");
+    } else {
+        printf("There are no process with pid %d in the system. Please try again!!\n", pid);
+        printf("FAILURE...\n");
+    }
 }
