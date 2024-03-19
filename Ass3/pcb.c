@@ -20,7 +20,7 @@ List* receive_blocker;
 PCB* init_pcb;
 PCB* curr_pcb;
 List* list_pcb;
-List* sem;
+List* list_sem;
 
 bool compare_pid(void* pcb, void* pid) {
     return ((PCB*)pcb)->pid == *(int*)pid;
@@ -121,7 +121,7 @@ void create_pcb_init() {
     send_blocker = List_create();
     receive_blocker = List_create();
     list_pcb = List_create();
-    sem = List_create();
+    list_sem = List_create();
 }
 
 void create_pcb(int priority) {
@@ -147,6 +147,7 @@ void create_pcb(int priority) {
         }
     }
 
+    printf("Successfully creating new pcb with pid %d !!\n", pid);
     printf("SUCCESS...\n");
 }
 
@@ -239,15 +240,40 @@ void total_info_pcb() {
             List_next(list_pcb);
         }
     } else {
-        printf("There are no processes running in the system\n");
+        printf("There are no processes running in the system\n\n");
+    }
+
+    if (List_count(list_sem) > 0) {
+        printf("List of semaphore in the system: \n\n");
+        List_first(list_sem);
+        while(List_curr(list_sem) != NULL) {
+            SEM* sem = List_curr(list_sem);
+            printf("Semaphore sid %d\n", sem->sid);
+            List_next(list_sem);
+        }
+    } else {
+        printf("There are no semaphores in the system\n\n");
     }
 }
 
 void quantum_pcb() {
     if (curr_pcb->pid == 0) {
         printf("Currently init processor is running!!. Cannot quantum\n");
+        printf("FAILURE...\n");
         return;
     }
 
     next_pcb();
+}
+
+void create_sem(int sid, int initVal) {
+    SEM* sem = malloc(sizeof(sem));
+    sem->sid = sid;
+    sem->initVal = initVal;
+    sem->val = initVal;
+    sem->waitList = List_create();
+
+    List_append(list_sem, sem);
+    printf("Successfully creating new semaphore with sid %d !!\n", sid);
+    printf("SUCCESS...\n");
 }
