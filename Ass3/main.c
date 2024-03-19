@@ -13,6 +13,7 @@ int main() {
 		memset(&input, 0, 50);
 		fgets(input, 50, stdin);
 		char text[50]; // Text input, used for pids and messages
+        printf("============================================================\n\n");
 
         switch (input[0]) {
             case 'C':
@@ -83,7 +84,6 @@ int main() {
 
                 text[++index] = '\0';
                 int kill_pid = atoi(text);
-                printf("%d\n", kill_pid);
                 kill_pcb(kill_pid);
                 break;
 
@@ -145,6 +145,39 @@ int main() {
 
                 pid = atoi(text);
                 proc_info(pid);
+                break;
+
+            case 'S':
+                if (input[1] != ' ') {
+                    printf("Sending format is wrong please try agian!!\n");
+                    printf("FAILURE...\n");
+                    break;
+                }
+
+                index = 0;
+                input_text = input + 2;
+                while (*input_text != ' ' && *input_text != '\n') {
+                    text[index] = *input_text;
+                    index++;
+                    input_text++;
+                }
+
+                pid = atoi(text);
+
+                memset(&text, 0, 50);
+                index = 0;
+                input_text++;
+                while (*input_text != '\n') {
+                    text[index] = *input_text;
+                    index++;
+                    input_text++;
+                }
+
+                text[++index] = '\0';
+
+                char* msg = malloc(50 * sizeof(char));
+                strcpy(msg, text);
+                send_pcb(pid, msg);
                 break;
 
             default:

@@ -332,3 +332,37 @@ void proc_info(int pid) {
         printf("FAILURE...\n");
     }
 }
+
+void send_pcb(int pid, char* msg) {
+    if (pid == curr_pcb->pid) {
+        printf("You are sending message to yourself. Please try again!!\n");
+        printf("FAILURE...\n");
+        return;
+    }
+    List_first(list_pcb);
+    PCB* receiver_pcb = List_search(list_pcb, compare_pid, &pid);
+    if (receiver_pcb == NULL) {
+        printf("There is no process with pid %d in the system to send message. Please try again!!\n", pid);
+        printf("FAILURE...\n");
+        return;
+    }
+
+    if (receiver_pcb->proc_message != NULL) {
+        printf("The receiver process has not received their message yet. Please try again after they receiving!!\n");
+        printf("FAILURE...\n");
+        return;
+    }
+
+    // Attach message to receiver
+    printf("Successgully send message...\n");
+    receiver_pcb->proc_message = msg;
+
+    // Blocking sender until it gets reply
+    printf("Blocking current process until receiving reply...\n");
+    curr_pcb->state = BLOCKED;
+    List_append(send_blocker, curr_pcb);
+
+    // Move to the next waiting process
+    curr_pcb = NULL;
+    next_pcb();
+}
