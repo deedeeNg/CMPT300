@@ -30,6 +30,27 @@ bool compare_sid(void* sem, void* sid) {
     return ((SEM*)sem)->sid == *(int*)sid;
 }
 
+void put_pcb(PCB* pcb) {
+    if (pcb == NULL) {
+        printf("There is no process to put it in waiting queue. Please try again!!\n");
+        return;
+    }
+    if (pcb->priority == 0) {
+        printf("Putting process pid %d to high priority queue... \n", pid);
+        List_append(high_priority, pcb);
+        return;
+    } else if (pcb->priority == 1) {
+        printf("Putting process pid %d to medium priority queue... \n", pid);
+        List_append(medium_priority, pcb);
+        return;
+    } else {
+        printf("Putting process pid %d to medium priority queue... \n", pid);
+        List_append(medium_priority, pcb);
+        return;
+    }
+    printf("SUCCESS...\n");
+}
+
 void remove_pcb(int pid) {
     List_first(high_priority);
     List_first(medium_priority);
@@ -351,6 +372,7 @@ void send_pcb(int pid, char* msg) {
         printf("FAILURE...\n");
         return;
     }
+
     List_first(list_pcb);
     PCB* receiver_pcb = List_search(list_pcb, compare_pid, &pid);
     if (receiver_pcb == NULL) {
@@ -360,19 +382,27 @@ void send_pcb(int pid, char* msg) {
     }
 
     if (receiver_pcb->proc_message != NULL) {
-        printf("The receiver process has not received their message yet. Please try again after they receiving!!\n");
+        printf("The receiver process has not finished reading their message yet. Please try again after they receiving!!\n");
         printf("FAILURE...\n");
         return;
     }
 
     // Attach message to receiver
-    printf("Successgully send message...\n");
+    printf("Successfully send message...\n");
     receiver_pcb->proc_message = msg;
 
     // Blocking sender until it gets reply
     printf("Blocking current process until receiving reply...\n");
     curr_pcb->state = BLOCKED;
     List_append(send_blocker, curr_pcb);
+
+    // Unblock receiver if they are waiting message arrive
+    List_first(receive_blocker);
+    PCB* receive_blocker_pcb = List_search(receive_blocker, compare_pid, &pid);
+    if (receive_blocker_pcb != NULL) {
+        List_remove(receive_blocker);
+        put_pcb(receive_blocker_pcb);
+    }
 
     // Move to the next waiting process
     curr_pcb = NULL;
@@ -386,8 +416,11 @@ void receive_pcb() {
         return;
     }
 
+    // If there is message then read it
     if (curr_pcb->proc_message != NULL) {
         printf("New message received: %s\n\n", curr_pcb->proc_message);
+        free(curr_pcb->proc_message);
+        curr_pcb->proc_message = NULL;
         return;
     }
     

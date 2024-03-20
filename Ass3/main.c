@@ -175,6 +175,7 @@ int main() {
 
                 char* msg = malloc(50 * sizeof(char));
                 strcpy(msg, text);
+
                 send_pcb(pid, msg);
                 break;
 
