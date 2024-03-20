@@ -29,5 +29,12 @@ nor getting blocked by the user
 A process only receive one message from
 the first process that sent it. If there
 are multiple messages send to the process,
-It will receive only first one and ignore 
-the other
+It will receive only first one and send 
+error if multiple message coming 
+
+6. 
+The process only reply to another process
+if they are blocking in sending operation
+(Or we can say they are waiting reply)
+If they reply to the process that not
+waiting for the reply then send error

@@ -35,17 +35,19 @@ void put_pcb(PCB* pcb) {
         printf("There is no process to put it in waiting queue. Please try again!!\n");
         return;
     }
+
+    pcb->state = READY;
     if (pcb->priority == 0) {
-        printf("Putting process pid %d to high priority queue... \n", pid);
+        printf("Putting process pid %d to high priority queue... \n", pcb->pid);
         List_append(high_priority, pcb);
         return;
     } else if (pcb->priority == 1) {
-        printf("Putting process pid %d to medium priority queue... \n", pid);
+        printf("Putting process pid %d to medium priority queue... \n", pcb->pid);
         List_append(medium_priority, pcb);
         return;
     } else {
-        printf("Putting process pid %d to medium priority queue... \n", pid);
-        List_append(medium_priority, pcb);
+        printf("Putting process pid %d to low priority queue... \n", pcb->pid);
+        List_append(low_priority, pcb);
         return;
     }
     printf("SUCCESS...\n");
@@ -361,7 +363,7 @@ void proc_info(int pid) {
 }
 
 void send_pcb(int pid, char* msg) {
-     if (curr_pcb->pid == 0) {
+    if (curr_pcb->pid == 0) {
         printf("Init Process is running. Cannot sending!!\n");
         printf("FAILURE...\n");
         return;
@@ -432,4 +434,42 @@ void receive_pcb() {
     // Move to the next waiting process
     curr_pcb = NULL;
     next_pcb();
+}
+
+void reply_pcb(int pid, char* msg) {
+    if (curr_pcb->pid == 0) {
+        printf("Init Process is running. Cannot replying!!\n");
+        printf("FAILURE...\n");
+        return;
+    }
+
+    if (pid == curr_pcb->pid) {
+        printf("You are replying message to yourself. Please try again!!\n");
+        printf("FAILURE...\n");
+        return;
+    }
+
+    List_first(list_pcb);
+    PCB* receiver_pcb = List_search(list_pcb, compare_pid, &pid);
+    if (receiver_pcb == NULL) {
+        printf("There is no process with pid %d in the system to reply message. Please try again!!\n", pid);
+        printf("FAILURE...\n");
+        return;
+    }
+
+    // Attach message to receiver
+    printf("Successfully reply message...\n");
+    receiver_pcb->proc_message = msg;
+
+    // Unblock sender if they are waiting reply arrive, otherwise send error if the pid not waiting a reply
+    List_first(send_blocker);
+    PCB* send_blocker_pcb = List_search(send_blocker, compare_pid, &pid);
+    if (send_blocker_pcb != NULL) {
+        List_remove(send_blocker);
+        put_pcb(send_blocker_pcb);
+    } else {
+        printf("There are no sender with pid %d is waiting for the reply. Please try again!!\n", pid);
+        printf("FAILURE...\n");
+        return;
+    }
 }

@@ -149,7 +149,7 @@ int main() {
 
             case 'S':
                 if (input[1] != ' ') {
-                    printf("Sending format is wrong please try agian!!\n");
+                    printf("Sending format is wrong please try again!!\n");
                     printf("FAILURE...\n");
                     break;
                 }
@@ -190,6 +190,41 @@ int main() {
 
                 receive_pcb();
                 break;
+
+            case 'Y':
+                if (input[1] != ' ') {
+                    printf("replying format is wrong please try again!!\n");
+                    printf("FAILURE...\n");
+                    break;
+                }
+
+                index = 0;
+                input_text = input + 2;
+                while (*input_text != ' ' && *input_text != '\n') {
+                    text[index] = *input_text;
+                    index++;
+                    input_text++;
+                }
+
+                pid = atoi(text);
+
+                memset(&text, 0, 50);
+                index = 0;
+                input_text++;
+                while (*input_text != '\n') {
+                    text[index] = *input_text;
+                    index++;
+                    input_text++;
+                }
+
+                text[++index] = '\0';
+
+                msg = malloc(50 * sizeof(char));
+                strcpy(msg, text);
+
+                reply_pcb(pid, msg);
+                break;
+
             default:
                 printf("Cannot recognize input. Please try again!!\n");
                 break;
