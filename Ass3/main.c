@@ -167,7 +167,7 @@ int main() {
                 memset(&text, 0, 50);
                 index = 0;
                 input_text++;
-                while (*input_text != '\n') {Nujabes/shing02 
+                while (*input_text != '\n') {
                     input_text++;
                 }
 
@@ -178,6 +178,15 @@ int main() {
                 send_pcb(pid, msg);
                 break;
 
+            case 'R':
+                if (input[1] != '\n') {
+                    printf("Receive format is wrong please try again!!\n");
+                    printf("FAILURE...\n");
+                    break;
+                }
+
+                receive_pcb();
+                break;
             default:
                 printf("Cannot recognize input. Please try again!!\n");
                 break;

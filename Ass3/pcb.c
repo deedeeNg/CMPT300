@@ -340,6 +340,12 @@ void proc_info(int pid) {
 }
 
 void send_pcb(int pid, char* msg) {
+     if (curr_pcb->pid == 0) {
+        printf("Init Process is running. Cannot sending!!\n");
+        printf("FAILURE...\n");
+        return;
+    }
+
     if (pid == curr_pcb->pid) {
         printf("You are sending message to yourself. Please try again!!\n");
         printf("FAILURE...\n");
@@ -380,5 +386,17 @@ void receive_pcb() {
         return;
     }
 
-    if ()
+    if (curr_pcb->proc_message != NULL) {
+        printf("New message received: %s\n\n", curr_pcb->proc_message);
+        return;
+    }
+    
+    // Blocking receiver until there is message arrives
+    printf("Blocking current process until receiving message...\n");
+    curr_pcb->state = BLOCKED;
+    List_append(receive_blocker, curr_pcb);
+
+    // Move to the next waiting process
+    curr_pcb = NULL;
+    next_pcb();
 }
