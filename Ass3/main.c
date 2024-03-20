@@ -9,10 +9,10 @@ int main() {
 
     while (1) {
         printf("> ");
-		char input[50];
-		memset(&input, 0, 50);
-		fgets(input, 50, stdin);
-		char text[50]; // Text input, used for pids and messages
+		char input[40];
+		memset(&input, 0, 40);
+		fgets(input, 40, stdin);
+		char text[40]; // Text input, used for pids and messages
         printf("============================================================\n\n");
 
         switch (input[0]) {
@@ -109,7 +109,7 @@ int main() {
                     break;
                 }
 
-                memset(&text, 0, 50);
+                memset(&text, 0, 40);
                 index = 0;
                 input_text++;
                 while (*input_text != '\n') {
@@ -164,7 +164,7 @@ int main() {
 
                 pid = atoi(text);
 
-                memset(&text, 0, 50);
+                memset(&text, 0, 40);
                 index = 0;
                 input_text++;
                 while (*input_text != '\n') {
@@ -175,7 +175,7 @@ int main() {
 
                 text[++index] = '\0';
 
-                char* msg = malloc(50 * sizeof(char));
+                char* msg = malloc(40 * sizeof(char));
                 strcpy(msg, text);
 
                 send_pcb(pid, msg);
@@ -208,7 +208,7 @@ int main() {
 
                 pid = atoi(text);
 
-                memset(&text, 0, 50);
+                memset(&text, 0, 40);
                 index = 0;
                 input_text++;
                 while (*input_text != '\n') {
@@ -219,10 +219,50 @@ int main() {
 
                 text[++index] = '\0';
 
-                msg = malloc(50 * sizeof(char));
+                msg = malloc(40 * sizeof(char));
                 strcpy(msg, text);
 
                 reply_pcb(pid, msg);
+                break;
+
+            case 'P':
+                if (input[1] != ' ') {
+                    printf("Semaphore P format is wrong please try again!!\n");
+                    printf("FAILURE...\n");
+                    break;
+                }
+
+                pid_text = input + 2;
+                index = 0;
+                while (*pid_text != '\n') {
+                    text[index] = *pid_text;
+                    index++;
+                    pid_text++;
+                }
+
+                text[++index] = '\0';
+                sid = atoi(text);
+                p_sem(sid);
+                break;
+
+            case 'V':
+                if (input[1] != ' ') {
+                    printf("Semaphore V format is wrong please try again!!\n");
+                    printf("FAILURE...\n");
+                    break;
+                }
+
+                pid_text = input + 2;
+                index = 0;
+                while (*pid_text != '\n') {
+                    text[index] = *pid_text;
+                    index++;
+                    pid_text++;
+                }
+
+                text[++index] = '\0';
+                sid = atoi(text);
+                v_sem(sid);
                 break;
 
             default:

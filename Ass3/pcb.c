@@ -30,6 +30,23 @@ bool compare_sid(void* sem, void* sid) {
     return ((SEM*)sem)->sid == *(int*)sid;
 }
 
+void print_pcb(PCB* pcb, int count) {
+    char* state;
+    if (pcb->state == READY) {
+        state = "READY";
+    } else if (pcb->state == RUNNING) {
+        state = "RUNNING";
+    } else {
+        state = "BLOCKED";
+    }
+    printf("Process #%d: \n", count);
+    printf("    Pid: %d\n", pcb->pid);
+    printf("    Priority: %d\n", pcb->priority);
+    printf("    State: %s\n", state);
+    printf("    proc_message: %s\n", pcb->proc_message);
+    printf("\n");
+}
+
 void put_pcb(PCB* pcb) {
     if (pcb == NULL) {
         printf("There is no process to put it in waiting queue. Please try again!!\n");
@@ -223,7 +240,7 @@ void kill_pcb(int pid) {
             printf("FAILURE...\n");
             return;
         } else {
-            printf("Terminate... See you later UwU.");
+            printf("Terminate... See you later UwU.\n");
             exit(1);
         }
     }
@@ -239,7 +256,7 @@ void exit_pcb() {
             printf("FAILURE...\n");
             return;
         } else {
-            printf("Terminate... See you later UwU.");
+            printf("Terminate... See you later UwU.\n");
             exit(1);
         }
     }
@@ -257,51 +274,109 @@ void exit_pcb() {
 }
 
 void total_info_pcb() {
-    if (List_count(list_pcb) > 0) {
-        int count = 0;
-        printf("List of process in the system: \n\n");
-        List_first(list_pcb);
-        while(List_curr(list_pcb) != NULL) {
-            count++;
-            PCB* pcb = List_curr(list_pcb);
-            char* state;
-            if (pcb->state == READY) {
-                state = "READY";
-            } else if (pcb->state == RUNNING) {
-                state = "RUNNING";
-            } else {
-                state = "BLOCKED";
-            }
-            printf("Process #%d: \n", count);
-            printf("    Pid: %d\n", pcb->pid);
-            printf("    Priority: %d\n", pcb->priority);
-            printf("    State: %s\n", state);
-            printf("    proc_message: %s\n", pcb->proc_message);
-            printf("\n");
-            List_next(list_pcb);
-        }
-    } else {
+    int count = 0;
+    if (List_count(list_pcb) == 0) {
         printf("There are no processes running in the system\n\n");
+        return;
     }
 
-    printf("\n");
+    // Print current process running
+    if (curr_pcb == NULL || curr_pcb->pid == 0) {
+        printf("### There is no process that running in the system (Init process is running) ###\n\n");
+    } else {
+        printf("### Information's process currently running in the system ###\n\n");
+        count++;
+        print_pcb(curr_pcb, count);
+    }
+
+    // Print process that waiting in high priority queue
+    if (List_count(high_priority) == 0) {
+        printf("### There are no processes that waiting in high priority queue ###\n\n");
+    } else {
+        printf("### List of proccesses that waiting in high priority queue ###\n\n");
+        List_first(high_priority);
+        while(List_curr(high_priority) != NULL) {
+            count++;
+            PCB* pcb = List_curr(high_priority);
+            print_pcb(pcb, count);
+            List_next(high_priority);
+        }
+    }
+
+    // Print process that waiting in medium priority queue
+    if (List_count(medium_priority) == 0) {
+        printf("### There are no processes that waiting in medium priority queue ###\n\n");
+    } else {
+        printf("### List of proccesses that waiting in medium priority queue ###\n\n");
+        List_first(medium_priority);
+        while(List_curr(medium_priority) != NULL) {
+            count++;
+            PCB* pcb = List_curr(medium_priority);
+            print_pcb(pcb, count);
+            List_next(medium_priority);
+        }
+    }
+
+    // Print process that waiting in low priority queue
+    if (List_count(low_priority) == 0) {
+        printf("### There are no processes that waiting in low priority queue ###\n\n");
+    } else {
+        printf("### List of proccesses that waiting in low priority queue ###\n\n");
+        List_first(low_priority);
+        while(List_curr(low_priority) != NULL) {
+            count++;
+            PCB* pcb = List_curr(low_priority);
+            print_pcb(pcb, count);
+            List_next(low_priority);
+        }
+    }
+
+    // Print process that blocking by send operation
+    if (List_count(send_blocker) == 0) {
+        printf("### There are no processes that blocking by send operation ###\n\n");
+    } else {
+        printf("### List of proccesses that blocking by send operation ###\n\n");
+        List_first(send_blocker);
+        while(List_curr(send_blocker) != NULL) {
+            count++;
+            PCB* pcb = List_curr(send_blocker);
+            print_pcb(pcb, count);
+            List_next(send_blocker);
+        }
+    }
+
+    // Print process that blocking by receive operation
+    if (List_count(receive_blocker) == 0) {
+        printf("### There are no processes that blocking by receive operation ###\n\n");
+    } else {
+        printf("### List of proccesses that blocking by receive operation ###\n\n");
+        List_first(receive_blocker);
+        while(List_curr(receive_blocker) != NULL) {
+            count++;
+            PCB* pcb = List_curr(receive_blocker);
+            print_pcb(pcb, count);
+            List_next(receive_blocker);
+        }
+    }
 
     if (List_count(list_sem) > 0) {
-        int count = 0;
-        printf("List of semaphore in the system: \n\n");
         List_first(list_sem);
-        while(List_curr(list_sem) != NULL) {
-            count++;
+        while (List_curr(list_sem) != NULL) {
             SEM* sem = List_curr(list_sem);
-            printf("Semaphore #%d: \n", count);
-            printf("    Sid: %d\n", sem->sid);
-            printf("    Value: %d\n", sem->val);
-            printf("    Initial Value: %d\n", sem->initVal);
-            printf("\n");
+            if (List_count(sem->waitList) == 0) {
+                printf("### There are no processes that blocking by semaphore sid %d ###\n\n", sem->sid);
+            } else {
+                printf("### List of proccesses that blocking by semaphore sid %d ###\n\n", sem->sid);
+                List_first(sem->waitList);
+                while(List_curr(sem->waitList) != NULL) {
+                    count++;
+                    PCB* pcb = List_curr(sem->waitList);
+                    print_pcb(pcb, count);
+                    List_next(sem->waitList);
+                }
+            }
             List_next(list_sem);
         }
-    } else {
-        printf("There are no semaphores in the system\n\n");
     }
 }
 
@@ -469,6 +544,48 @@ void reply_pcb(int pid, char* msg) {
         put_pcb(send_blocker_pcb);
     } else {
         printf("There are no sender with pid %d is waiting for the reply. Please try again!!\n", pid);
+        printf("FAILURE...\n");
+        return;
+    }
+}
+
+void p_sem(int sid) {
+    // Searching semaphore with sid
+    List_first(list_sem);
+    SEM* sem = List_search(list_sem, compare_sid, &sid);
+    if (sem == NULL) {
+        printf("There are no semaphore with sid. Please try again!!\n");
+        printf("FAILURE...\n");
+        return;
+    }
+
+    printf("Blocking currently process by semaphore sid %d...\n", sid);
+    curr_pcb->state = BLOCKED;
+    List_append(sem->waitList, curr_pcb);
+    sem->val--;
+
+    // Move to the next waiting process
+    curr_pcb = NULL;
+    next_pcb();
+}
+
+void v_sem(int sid) {
+    // Searching semaphore with sid
+    List_first(list_sem);
+    SEM* sem = List_search(list_sem, compare_sid, &sid);
+    if (sem == NULL) {
+        printf("There are no semaphore with sid. Please try again!!\n");
+        printf("FAILURE...\n");
+        return;
+    }
+
+    if (sem->val < sem->initVal) {
+        sem->val++;
+        List_first(sem->waitList);
+        PCB* unblocked_pcb = List_remove(sem->waitList);
+        put_pcb(unblocked_pcb);
+    } else {
+        printf("There are no processes that blocking by this semaphore. Please try again!!");
         printf("FAILURE...\n");
         return;
     }

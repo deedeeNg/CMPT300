@@ -38,3 +38,9 @@ if they are blocking in sending operation
 (Or we can say they are waiting reply)
 If they reply to the process that not
 waiting for the reply then send error
+
+7.
+There are some exceptional behaviour
+while you typing input and it read wrong
+because the OS behaviour. So if you getting
+that, please compile it again!!!

@@ -28,6 +28,7 @@ struct SEM_s {
 
 bool compare_pid(void* pcb, void* pid);
 bool compare_sid(void* sem, void* sid);
+void print_pcb(PCB* pcb, int count);
 void put_pcb(PCB* pcb);
 void remove_pcb(int pid);
 void next_pcb();
@@ -43,6 +44,8 @@ void proc_info(int pid);
 void send_pcb(int pid, char* msg);
 void receive_pcb();
 void reply_pcb(int pid, char* msg);
+void p_sem(int sid);
+void v_sem(int sid);
 
 #endif
 
