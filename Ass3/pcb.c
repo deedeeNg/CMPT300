@@ -211,8 +211,14 @@ void kill_pcb(int pid) {
 
 void exit_pcb() {
     if (curr_pcb->pid == 0) {
-        printf("Terminate... See you later UwU.\n");
-        exit(1);
+        if (List_count(list_pcb) > 0) {
+            printf("Trying to kill init processor while other processes still running. Cannot kill!!\n");
+            printf("FAILURE...\n");
+            return;
+        } else {
+            printf("Terminate... See you later UwU.");
+            exit(1);
+        }
     }
 
     printf("Removing current process pid %d ...\n", curr_pcb->pid);
@@ -365,4 +371,14 @@ void send_pcb(int pid, char* msg) {
     // Move to the next waiting process
     curr_pcb = NULL;
     next_pcb();
+}
+
+void receive_pcb() {
+    if (curr_pcb->pid == 0) {
+        printf("Init Process is running. Cannot receiving!!\n");
+        printf("FAILURE...\n");
+        return;
+    }
+
+    if ()
 }

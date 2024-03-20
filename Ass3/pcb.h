@@ -40,6 +40,7 @@ void total_info_pcb();
 void create_sem(int sid, int initVal);
 void proc_info(int pid);
 void send_pcb(int pid, char* msg);
+void receive_pcb();
 
 #endif
 

@@ -167,9 +167,7 @@ int main() {
                 memset(&text, 0, 50);
                 index = 0;
                 input_text++;
-                while (*input_text != '\n') {
-                    text[index] = *input_text;
-                    index++;
+                while (*input_text != '\n') {Nujabes/shing02 
                     input_text++;
                 }
 
