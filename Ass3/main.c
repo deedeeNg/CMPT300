@@ -168,6 +168,8 @@ int main() {
                 index = 0;
                 input_text++;
                 while (*input_text != '\n') {
+                    text[index] = *input_text;
+                    index++;
                     input_text++;
                 }
 
