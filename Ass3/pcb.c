@@ -30,6 +30,40 @@ bool compare_sid(void* sem, void* sid) {
     return ((SEM*)sem)->sid == *(int*)sid;
 }
 
+void free_proc(void* item) {
+    PCB* pcb = (PCB*)item;
+    if (pcb != NULL) {
+         if (pcb->proc_message != NULL) {
+            free(pcb->proc_message);
+        }
+
+        free(pcb);
+    }
+}
+
+void free_sem(void* item) {
+    SEM* sem = (SEM*)item;
+    if (sem != NULL) {
+        List_free(sem->waitList, free_proc);
+        free(sem);
+    }
+}
+
+void system_free() {
+    List_free(high_priority, free_proc);
+    List_free(medium_priority, free_proc);
+    List_free(low_priority, free_proc);
+    List_free(send_blocker, free_proc);
+    List_free(receive_blocker, free_proc);
+    List_free(list_sem, free_sem);
+    List_free(list_pcb, free_proc);
+
+    if (curr_pcb != NULL) {
+        free_proc(curr_pcb);
+    }
+    free_proc(init_pcb);
+}
+
 void print_pcb(PCB* pcb, int count) {
     char* state;
     if (pcb->state == READY) {
@@ -249,6 +283,7 @@ void kill_pcb(int pid) {
             return;
         } else {
             printf("Terminate... See you later UwU.\n");
+            system_free();
             exit(1);
         }
     }
@@ -260,11 +295,13 @@ void kill_pcb(int pid) {
 void exit_pcb() {
     if (curr_pcb->pid == 0) {
         if (List_count(list_pcb) > 0) {
-            printf("Trying to kill init processor while other processes still running. Cannot kill!!\n");
+            printf("Trying to kill init processor while other processes still running. Cannot kill!!\n"); printf("Current process switch to pid %d\n", curr_pcb->pid);
+        return;
             printf("FAILURE...\n");
             return;
         } else {
             printf("Terminate... See you later UwU.\n");
+            system_free();
             exit(1);
         }
     }
@@ -423,7 +460,8 @@ void proc_info(int pid) {
     List_first(list_pcb);
     PCB* pcb = List_search(list_pcb, compare_pid, &pid);
 
-    if (pcb != NULL) {
+    if (pcb != NULL) { printf("Current process switch to pid %d\n", curr_pcb->pid);
+        return;
         char* state;
         if (pcb->state == READY) {
             state = "READY";
