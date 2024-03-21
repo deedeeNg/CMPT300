@@ -53,6 +53,14 @@ void put_pcb(PCB* pcb) {
         return;
     }
 
+    // If Init process is running then run the pcb
+    if (curr_pcb->pid == 0) {
+        pcb->state = RUNNING;
+        curr_pcb = pcb;
+        printf("Current process switch to pid %d\n", curr_pcb->pid);
+        return;
+    }
+
     pcb->state = READY;
     if (pcb->priority == 0) {
         printf("Putting process pid %d to high priority queue... \n", pcb->pid);
@@ -583,6 +591,7 @@ void v_sem(int sid) {
         sem->val++;
         List_first(sem->waitList);
         PCB* unblocked_pcb = List_remove(sem->waitList);
+        printf("Unblocking process pid %d from semaphore sid %d!!\n", unblocked_pcb->pid, sem->sid);
         put_pcb(unblocked_pcb);
     } else {
         printf("There are no processes that blocking by this semaphore. Please try again!!");
