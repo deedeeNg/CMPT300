@@ -45,6 +45,7 @@ void free_sem(void* item) {
     SEM* sem = (SEM*)item;
     if (sem != NULL) {
         List_free(sem->waitList, free_proc);
+        free(sem->waitList);
         free(sem);
     }
 }
@@ -58,9 +59,6 @@ void system_free() {
     List_free(list_sem, free_sem);
     List_free(list_pcb, free_proc);
 
-    if (curr_pcb != NULL) {
-        free_proc(curr_pcb);
-    }
     free_proc(init_pcb);
 }
 
@@ -124,16 +122,16 @@ void remove_pcb(int pid) {
         List_remove(high_priority);
     } else if (List_search(medium_priority, compare_pid, &pid) != NULL) {
         printf("Removing process pid %d from medium priority queue... \n", pid);
-         List_remove(medium_priority);
+        List_remove(medium_priority);
     } else if (List_search(low_priority, compare_pid, &pid) != NULL) {
         printf("Removing process pid %d from low priority queue... \n", pid);
-         List_remove(low_priority);
+        List_remove(low_priority);
     } else if (List_search(send_blocker, compare_pid, &pid) != NULL) {
         printf("Removing process pid %d from send blocker queue... \n", pid);
-         List_remove(send_blocker);
+        List_remove(send_blocker);
     } else if (List_search(receive_blocker, compare_pid, &pid) != NULL) {
         printf("Removing process pid %d from receive blocker queue... \n", pid);
-         List_remove(receive_blocker);
+        List_remove(receive_blocker);
     } else {
         printf("There is no process with pid %d in the system. Cannot kill!!\n", pid);
         printf("FAILURE...\n");
