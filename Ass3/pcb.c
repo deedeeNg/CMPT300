@@ -45,7 +45,6 @@ void free_sem(void* item) {
     SEM* sem = (SEM*)item;
     if (sem != NULL) {
         List_free(sem->waitList, free_proc);
-        free(sem->waitList);
         free(sem);
     }
 }
@@ -116,6 +115,8 @@ void remove_pcb(int pid) {
     List_first(low_priority);
     List_first(send_blocker);
     List_first(receive_blocker);
+
+    bool inSem = false;
     
     if (List_search(high_priority, compare_pid, &pid) != NULL) {
         printf("Removing process pid %d from high priority queue... \n", pid);
@@ -133,9 +134,25 @@ void remove_pcb(int pid) {
         printf("Removing process pid %d from receive blocker queue... \n", pid);
         List_remove(receive_blocker);
     } else {
-        printf("There is no process with pid %d in the system. Cannot kill!!\n", pid);
-        printf("FAILURE...\n");
-        return;
+        List_first(list_sem);
+        while (List_curr(list_sem) != NULL) {
+            SEM* sem = List_curr(list_sem);
+            List_first(sem->waitList);
+            if (List_search(sem->waitList, compare_pid, &pid) != NULL) {
+                printf("Removing process pid %d from semaphore sid %d blocker queue...\n", pid, sem->sid);
+                List_remove(sem->waitList);
+                inSem = true;
+                break;
+            } else {
+                List_next(list_sem);
+            }
+        }
+
+        if (inSem == false) {
+            printf("There is no process with pid %d in the system. Cannot kill!!\n", pid);
+            printf("FAILURE...\n");
+            return;
+        }
     }
 
     printf("Removing process pid %d from the system... \n", pid);
@@ -166,26 +183,26 @@ void next_pcb() {
         curr_pcb = List_remove(high_priority);
         curr_pcb->state = RUNNING;
         printf("Current process switch to pid %d\n", curr_pcb->pid);
-        return;
     } else if (List_count(medium_priority) > 0) {
         List_first(medium_priority);
         curr_pcb = List_remove(medium_priority);
         curr_pcb->state = RUNNING;
         printf("Current process switch to pid %d\n", curr_pcb->pid);
-        return;
     } else if (List_count(low_priority) > 0) {
         List_first(low_priority);
         curr_pcb = List_remove(low_priority);
         curr_pcb->state = RUNNING;
         printf("Current process switch to pid %d\n", curr_pcb->pid);
-        return;
     } else {
         curr_pcb = init_pcb;
         printf("Current process switch to init process\n");
         return;
     }
 
-    printf("SUCCESS...\n");
+    if (curr_pcb->proc_message != NULL) {
+        printf("### TING TING new message ###\n");
+        printf("Message: %s\n\n", curr_pcb->proc_message);
+    }
 }
 
 void create_pcb_init() {
@@ -251,7 +268,7 @@ int fork_pcb() {
     proc->pid = pid;
     proc->priority = curr_pcb->priority;
     proc->state = READY;
-    proc->proc_message = curr_pcb->proc_message;
+    proc->proc_message = NULL;
 
     // Adding to waiting list
     List_append(list_pcb, proc);
@@ -534,14 +551,6 @@ void receive_pcb() {
     if (curr_pcb->pid == 0) {
         printf("Init Process is running. Cannot receiving!!\n");
         printf("FAILURE...\n");
-        return;
-    }
-
-    // If there is message then read it
-    if (curr_pcb->proc_message != NULL) {
-        printf("New message received: %s\n\n", curr_pcb->proc_message);
-        free(curr_pcb->proc_message);
-        curr_pcb->proc_message = NULL;
         return;
     }
     

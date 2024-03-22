@@ -44,3 +44,11 @@ There are some exceptional behaviour
 while you typing input and it read wrong
 because the OS behaviour. So if you getting
 that, please compile it again!!!
+
+8. 
+If process receive a message, then system
+will print the message when it's running 
+
+9.
+Fork function will not copy the message
+from the original process
