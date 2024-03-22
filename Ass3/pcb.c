@@ -600,6 +600,7 @@ void reply_pcb(int pid, char* msg) {
     List_first(send_blocker);
     PCB* send_blocker_pcb = List_search(send_blocker, compare_pid, &pid);
     if (send_blocker_pcb != NULL) {
+        printf("Reply successfully to process pid %d!!\n", send_blocker_pcb->pid);
         List_remove(send_blocker);
         send_blocker_pcb->block_message = msg;
         put_pcb(send_blocker_pcb);
