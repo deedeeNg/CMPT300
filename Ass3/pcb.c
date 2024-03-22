@@ -22,6 +22,32 @@ PCB* curr_pcb;
 List* list_pcb;
 List* list_sem;
 
+
+void intro () { 
+    printf("Welcome to OS simulation");
+    printf("Below is all the commands available  : \n" ) ;
+    printf(
+    "|-----------------|-----------------------------------|---------|\n"
+    "| Commands        | User Input                        | Example |\n"
+    "|-----------------|-----------------------------------|---------|\n"
+    "| Create          | C [priority]                      | C 1     |\n"
+    "| Fork            | F                                 | F       |\n"
+    "| Kill            | K [pid]                           | K 1     |\n"
+    "| Exit            | E                                 | E       |\n"
+    "| Quantum         | Q                                 | Q       |\n"
+    "| Send            | S [pid] [message]                 | S 1 hi  |\n"
+    "| Receive         | R                                 | R       |\n"
+    "| Reply           | Y [pid] [message]                 | Y 1 hi! |\n"
+    "| New Semaphores  | N [semaphore id] [initial value]  | N 2 0   |\n"
+    "| Semaphore P     | P [semaphore id]                  | P 2     |\n"
+    "| Semaphore V     | V [semaphore id]                  | V 2     |\n"
+    "| ProcInfo        | I [pid]                           | I 1     |\n"
+    "| Totalinfo       | T                                 | T       |\n"
+    "-----------------------------------------------------------------\n"
+        );
+
+}
+
 bool compare_pid(void* pcb, void* pid) {
     return ((PCB*)pcb)->pid == *(int*)pid;
 }

@@ -6,11 +6,26 @@ Huynh Vuong The Nguyen
 
 Here is the input structure for my OS simulations
 
-Create: C (priority)
-Fork: F 
-Kill: K (pid)
-Exit: E
-Quantum: Q
+|-----------------|-----------------------------------|---------|
+| Commands        | User Input                        | Example |
+|-----------------|-----------------------------------|---------|
+| Create          | C [priority]                      | C 1     |
+| Fork            | F                                 | F       |
+| Kill            | K [pid]                           | K 1     |
+| Exit            | E                                 | E       |
+| Quantum         | Q                                 | Q       |
+| Send            | S [pid] [message]                 | S 1 hi  |
+| Receive         | R                                 | R       |
+| Reply           | Y [pid] [message]                 | Y 1 hi! |
+| New Semaphores  | N [semaphore id] [initial value]  | N 2 0   |
+| Semaphore P     | P [semaphore id]                  | P 2     |
+| Semaphore V     | V [semaphore id]                  | V 2     |
+| ProcInfo        | I [pid]                           | I 1     |
+| Totalinfo       | T                                 | T       |
+-----------------------------------------------------------------
+
+
+
 
 
 Some comments about how my implementation works

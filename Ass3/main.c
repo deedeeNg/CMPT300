@@ -6,6 +6,7 @@
 
 int main() {
     create_pcb_init();
+    intro() ; 
 
     while (1) {
         printf("> ");

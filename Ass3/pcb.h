@@ -27,7 +27,7 @@ struct SEM_s {
     List* waitList;
 };
 
-
+void intro () ; 
 bool compare_pid(void* pcb, void* pid);
 bool compare_sid(void* sem, void* sid);
 void free_proc(void* item);
