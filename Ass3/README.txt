@@ -54,5 +54,13 @@ Fork function will not copy the message
 from the original process
 
 10.
-Init process cannot be blocked nor send,
-receive and reply
+Init process cannot be blocked by send,
+receive nor semaphores
+
+11.
+When the process has been blocked by send
+and receive operations, when it going back
+to ready queue, it means there is message 
+send or reply to them so that they can be 
+unblocked. when their turn to running, the 
+message will automatically show in the screen.

@@ -16,6 +16,7 @@ struct PCB_s {
     int priority;
     enum States state;
     char* proc_message;
+    char* block_message;
 };
 
 typedef struct SEM_s SEM;

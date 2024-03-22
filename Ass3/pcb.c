@@ -75,6 +75,7 @@ void print_pcb(PCB* pcb, int count) {
     printf("    Priority: %d\n", pcb->priority);
     printf("    State: %s\n", state);
     printf("    proc_message: %s\n", pcb->proc_message);
+    printf("    block_message: %s\n", pcb->block_message);
     printf("\n");
 }
 
@@ -199,11 +200,11 @@ void next_pcb() {
         return;
     }
 
-    if (curr_pcb->proc_message != NULL) {
-        printf("### TING TING new message ###\n");
-        printf("Message: %s\n\n", curr_pcb->proc_message);
-        free(curr_pcb->proc_message);
-        curr_pcb->proc_message = NULL;
+    if (curr_pcb->block_message != NULL) {
+        printf("### TING TING receive message ###\n");
+        printf("Message: %s\n\n", curr_pcb->block_message);
+        free(curr_pcb->block_message);
+        curr_pcb->block_message = NULL;
     }
 }
 
@@ -527,10 +528,6 @@ void send_pcb(int pid, char* msg) {
         return;
     }
 
-    // Attach message to receiver
-    printf("Successfully send message...\n");
-    receiver_pcb->proc_message = msg;
-
     // Blocking sender until it gets reply
     printf("Blocking current process until receiving reply...\n");
     curr_pcb->state = BLOCKED;
@@ -541,7 +538,12 @@ void send_pcb(int pid, char* msg) {
     PCB* receive_blocker_pcb = List_search(receive_blocker, compare_pid, &pid);
     if (receive_blocker_pcb != NULL) {
         List_remove(receive_blocker);
+        receive_blocker_pcb->block_message = msg;
         put_pcb(receive_blocker_pcb);
+    } else {
+        // Attach message to receiver
+        printf("Successfully send message...\n");
+        receiver_pcb->proc_message = msg;
     }
 
     // Move to the next waiting process
@@ -556,14 +558,21 @@ void receive_pcb() {
         return;
     }
     
-    // Blocking receiver until there is message arrives
-    printf("Blocking current process until receiving message...\n");
-    curr_pcb->state = BLOCKED;
-    List_append(receive_blocker, curr_pcb);
+    if (curr_pcb->proc_message != NULL) {
+        printf("Message received: %s\n\n", curr_pcb->proc_message);
+        free(curr_pcb->proc_message);
+        curr_pcb->proc_message = NULL;
+        return;
+    } else {
+         // Blocking receiver until there is message arrives
+        printf("Blocking current process until new message arrives to this process...\n");
+        curr_pcb->state = BLOCKED;
+        List_append(receive_blocker, curr_pcb);
 
-    // Move to the next waiting process
-    curr_pcb = NULL;
-    next_pcb();
+        // Move to the next waiting process
+        curr_pcb = NULL;
+        next_pcb();
+    }
 }
 
 void reply_pcb(int pid, char* msg) {
@@ -587,15 +596,12 @@ void reply_pcb(int pid, char* msg) {
         return;
     }
 
-    // Attach message to receiver
-    printf("Successfully reply message...\n");
-    receiver_pcb->proc_message = msg;
-
     // Unblock sender if they are waiting reply arrive, otherwise send error if the pid not waiting a reply
     List_first(send_blocker);
     PCB* send_blocker_pcb = List_search(send_blocker, compare_pid, &pid);
     if (send_blocker_pcb != NULL) {
         List_remove(send_blocker);
+        send_blocker_pcb->block_message = msg;
         put_pcb(send_blocker_pcb);
     } else {
         printf("There are no sender with pid %d is waiting for the reply. Please try again!!\n", pid);
