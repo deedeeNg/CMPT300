@@ -603,6 +603,11 @@ void reply_pcb(int pid, char* msg) {
 }
 
 void p_sem(int sid) {
+    if (curr_pcb->pid == 0) {
+        printf("Init Process is running. Cannot be blocked!!\n");
+        printf("FAILURE...\n");
+        return;
+    }
     // Searching semaphore with sid
     List_first(list_sem);
     SEM* sem = List_search(list_sem, compare_sid, &sid);

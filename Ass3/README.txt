@@ -52,3 +52,7 @@ will print the message when it's running
 9.
 Fork function will not copy the message
 from the original process
+
+10.
+Init process cannot be blocked nor send,
+receive and reply
