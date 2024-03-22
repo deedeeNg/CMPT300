@@ -4,6 +4,15 @@ Spring 2024
 Huynh Vuong The Nguyen
 301450119
 
+Here is the input structure for my OS simulations
+
+Create: C (priority)
+Fork: F 
+Kill: K (pid)
+Exit: E
+Quantum: Q
+
+
 Some comments about how my implementation works
 
 1. 

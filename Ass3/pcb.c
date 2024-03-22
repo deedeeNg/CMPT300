@@ -272,6 +272,7 @@ int fork_pcb() {
     proc->priority = curr_pcb->priority;
     proc->state = READY;
     proc->proc_message = NULL;
+    proc->block_message = NULL;
 
     // Adding to waiting list
     List_append(list_pcb, proc);
@@ -314,7 +315,6 @@ void exit_pcb() {
     if (curr_pcb->pid == 0) {
         if (List_count(list_pcb) > 0) {
             printf("Trying to kill init processor while other processes still running. Cannot kill!!\n"); printf("Current process switch to pid %d\n", curr_pcb->pid);
-        return;
             printf("FAILURE...\n");
             return;
         } else {
@@ -478,8 +478,7 @@ void proc_info(int pid) {
     List_first(list_pcb);
     PCB* pcb = List_search(list_pcb, compare_pid, &pid);
 
-    if (pcb != NULL) { printf("Current process switch to pid %d\n", curr_pcb->pid);
-        return;
+    if (pcb != NULL) { 
         char* state;
         if (pcb->state == READY) {
             state = "READY";

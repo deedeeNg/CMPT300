@@ -26,7 +26,7 @@ int main() {
                 if (priority > 2 || priority < 0) {
                     printf("Priority should be between 0 and 2, please try again!!\n");
                     printf("FAILURE...\n");
-                    break;
+                    break;   
                 }
 
                 create_pcb(priority);
