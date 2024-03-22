@@ -202,6 +202,8 @@ void next_pcb() {
     if (curr_pcb->proc_message != NULL) {
         printf("### TING TING new message ###\n");
         printf("Message: %s\n\n", curr_pcb->proc_message);
+        free(curr_pcb->proc_message);
+        curr_pcb->proc_message = NULL;
     }
 }
 
