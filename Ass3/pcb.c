@@ -22,7 +22,7 @@ PCB* curr_pcb;
 List* list_pcb;
 List* list_sem;
 
-
+// Initializes the simulation, displays startup message.
 void intro () { 
     printf("Welcome to OS simulation");
     printf("Below is all the commands available  : \n" ) ;
@@ -48,14 +48,17 @@ void intro () {
 
 }
 
+// Compares PCB's PID with a given PID, returns true if they match.
 bool compare_pid(void* pcb, void* pid) {
     return ((PCB*)pcb)->pid == *(int*)pid;
 }
 
+// Compares semaphore's ID with a given ID, returns true if they match.
 bool compare_sid(void* sem, void* sid) {
     return ((SEM*)sem)->sid == *(int*)sid;
 }
 
+// Frees memory allocated for a PCB.
 void free_proc(void* item) {
     PCB* pcb = (PCB*)item;
     if (pcb != NULL) {
@@ -67,6 +70,7 @@ void free_proc(void* item) {
     }
 }
 
+// Frees memory allocated for a semaphore.
 void free_sem(void* item) {
     SEM* sem = (SEM*)item;
     if (sem != NULL) {
@@ -75,6 +79,7 @@ void free_sem(void* item) {
     }
 }
 
+ // Frees all allocated memory for PCBs, semaphores, and process queues, and resets the system state.
 void system_free() {
     List_free(high_priority, free_proc);
     List_free(medium_priority, free_proc);
@@ -87,6 +92,7 @@ void system_free() {
     free_proc(init_pcb);
 }
 
+// Prints PCB detail information
 void print_pcb(PCB* pcb, int count) {
     char* state;
     if (pcb->state == READY) {
@@ -105,6 +111,7 @@ void print_pcb(PCB* pcb, int count) {
     printf("\n");
 }
 
+// Adds a PCB to the appropriate queue based on its priority.
 void put_pcb(PCB* pcb) {
     if (pcb == NULL) {
         printf("There is no process to put it in waiting queue. Please try again!!\n");
@@ -136,6 +143,7 @@ void put_pcb(PCB* pcb) {
     printf("SUCCESS...\n");
 }
 
+// Removes a PCB from its queue based on PID.
 void remove_pcb(int pid) {
     List_first(high_priority);
     List_first(medium_priority);
@@ -190,6 +198,8 @@ void remove_pcb(int pid) {
     free(pcb);
     printf("SUCCESS...\n");
 }
+
+// Switches context to the next PCB in the ready queue.
 void next_pcb() {
     if (curr_pcb != NULL) {
         curr_pcb->state = READY;
@@ -234,6 +244,7 @@ void next_pcb() {
     }
 }
 
+// Creates the "init" PCB at simulation start.
 void create_pcb_init() {
     PCB* proc = malloc(sizeof(PCB));
     proc->pid = 0;
@@ -254,6 +265,7 @@ void create_pcb_init() {
     list_sem = List_create();
 }
 
+// Creates a new PCB with the specified priority.
 void create_pcb(int priority) {
     pid++;
     PCB* proc = malloc(sizeof(PCB));
@@ -281,6 +293,7 @@ void create_pcb(int priority) {
     printf("SUCCESS...\n");
 }
 
+// Duplicates the currently running PCB.
 int fork_pcb() {
     if (curr_pcb == NULL) {
         printf("There is no process is running currently. Cannot fork!!\n");
@@ -314,7 +327,7 @@ int fork_pcb() {
     return proc->pid;
 }
 
-
+// Terminates a PCB based on PID.
 void kill_pcb(int pid) {
     if (curr_pcb->pid == pid) {
         exit_pcb();
@@ -337,6 +350,8 @@ void kill_pcb(int pid) {
     remove_pcb(pid);
 }
 
+
+// Terminates the currently running PCB.
 void exit_pcb() {
     if (curr_pcb->pid == 0) {
         if (List_count(list_pcb) > 0) {
@@ -362,6 +377,7 @@ void exit_pcb() {
     next_pcb();
 }
 
+// Displays detail information about queue and pcb
 void total_info_pcb() {
     int count = 0;
     if (List_count(list_pcb) == 0) {
@@ -469,6 +485,7 @@ void total_info_pcb() {
     }
 }
 
+// Handles the end of a time quantum for the currently running PCB and allow other process to run
 void quantum_pcb() {
     if (curr_pcb->pid == 0) {
         printf("Currently init processor is running!!. Cannot quantum\n");
@@ -479,6 +496,7 @@ void quantum_pcb() {
     next_pcb();
 }
 
+// create a semaphore with a given ID and initial value.
 void create_sem(int sid, int initVal) {
 
     // Searching from semaphore list if the sid is already existed or not
@@ -500,6 +518,7 @@ void create_sem(int sid, int initVal) {
     printf("SUCCESS...\n");
 }
 
+// Displays information for a specific PCB by PID.
 void proc_info(int pid) {
     List_first(list_pcb);
     PCB* pcb = List_search(list_pcb, compare_pid, &pid);
@@ -526,6 +545,7 @@ void proc_info(int pid) {
     }
 }
 
+// Sends a message from the current running PCB to another PCB.
 void send_pcb(int pid, char* msg) {
     if (curr_pcb->pid == 0) {
         printf("Init Process is running. Cannot sending!!\n");
@@ -576,6 +596,7 @@ void send_pcb(int pid, char* msg) {
     next_pcb();
 }
 
+// Sets the current running PCB to receive a message and display the message
 void receive_pcb() {
     if (curr_pcb->pid == 0) {
         printf("Init Process is running. Cannot receiving!!\n");
@@ -600,6 +621,7 @@ void receive_pcb() {
     }
 }
 
+// Sends a reply from the current PCB to another PCB.
 void reply_pcb(int pid, char* msg) {
     if (curr_pcb->pid == 0) {
         printf("Init Process is running. Cannot replying!!\n");
@@ -636,6 +658,7 @@ void reply_pcb(int pid, char* msg) {
     }
 }
 
+// Performs the P operation on a semaphore for the current running PCB.
 void p_sem(int sid) {
     if (curr_pcb->pid == 0) {
         printf("Init Process is running. Cannot be blocked!!\n");
@@ -661,6 +684,7 @@ void p_sem(int sid) {
     next_pcb();
 }
 
+// Performs the V operation on a semaphore for the current running PCB
 void v_sem(int sid) {
     // Searching semaphore with sid
     List_first(list_sem);
