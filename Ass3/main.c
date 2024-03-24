@@ -6,7 +6,7 @@
 
 int main() {
     create_pcb_init();
-    intro() ; 
+    intro();
 
     while (1) {
         printf("> ");
@@ -56,6 +56,7 @@ int main() {
                 if (input[1] != '\n') {
                     printf("Quantum format is wrong please try again!!\n");
                     printf("FAILURE...\n");
+                    break;
                 }
                 quantum_pcb();
                 break;
@@ -64,6 +65,7 @@ int main() {
                 if (input[1] != '\n') {
                     printf("Exit format is wrong please try again!!\n");
                     printf("FAILURE...\n");
+                    break;
                 }
                 exit_pcb();
                 break;
@@ -121,7 +123,7 @@ int main() {
 
                 int initVal = atoi(text);
                 if (initVal < 0) {
-                    printf("initial value of semaphore should be larger than 0. Please try again!!\n");
+                    printf("Initial value of semaphore should be larger than 0. Please try again!!\n");
                     printf("FAILURE...\n");
                     break;
                 }

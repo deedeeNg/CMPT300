@@ -24,7 +24,7 @@ List* list_sem;
 
 // Initializes the simulation, displays startup message.
 void intro () { 
-    printf("Welcome to OS simulation");
+    printf("Welcome to OS simulation\n");
     printf("Below is all the commands available  : \n" ) ;
     printf(
     "|-----------------|-----------------------------------|---------|\n"
